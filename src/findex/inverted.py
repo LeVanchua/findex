@@ -8,6 +8,7 @@ from typing import Iterator
 
 from .corpus import iter_documents
 from .tokenizer import tokenize
+from .timing import timed
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,6 +44,7 @@ class InvertedIndex:
                       key=lambda item: (-item[1], item[0]))[:limit]
 
 
+@timed
 def build_index(root: str | Path, with_positions: bool = False) -> InvertedIndex:
     """Traverse document generator exactly once; doc IDs increase from 1."""
     accumulator: defaultdict[str, list[Posting]] = defaultdict(list)
