@@ -64,7 +64,8 @@ def make_snippet(text: str, terms: tuple[str, ...], radius: int = 80) -> str:
     start = max(0, match.start() - radius)
     end = min(len(text), match.end() + radius)
     fragment = text[start:end].replace("\n", " ")
-    fragment = pattern.sub(lambda found: f"**{found.group()}**", fragment)
+    if pattern is not None:
+        fragment = pattern.sub(lambda found: f"**{found.group()}**", fragment)
     return ("…" if start else "") + fragment + ("…" if end < len(text) else "")
 
 
@@ -79,13 +80,13 @@ def ranked_search(index: Index, query: str, scorer: Scorer | None = None,
     log.info("query cache %s: %r", "HIT" if new.hits > old.hits else "MISS", query)
     node = parse_query(query)
     terms = tuple(dict.fromkeys(node.positive_terms()))
-    results = []
+    results: list[SearchResult] = []
     for doc_id in ids:
         meta = index.documents[doc_id]
         score = 0.0
         for term in terms:
             # Sorted posting list ensures a stable, directly inspectable format.
-            frequency = next((p.frequency for p in index._data.postings.get(term, ()) if p.doc_id == doc_id), 0)
+            frequency = next((p.frequency for p in index.postings_for(term) if p.doc_id == doc_id), 0)
             if frequency:
                 score += scorer.score(frequency, index.df(term), meta.length, index.num_docs, index.avg_doc_length)
         snippet = ""
