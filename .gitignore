@@ -5,3 +5,6 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .coverage
+index.bin
+index.json
+*.pickle
