@@ -34,10 +34,10 @@ ANNOTATIONS: tuple[Annotation, ...] = (
 
 def evaluate(index: Index) -> list[tuple[str, float, float]]:
     """P@5, with unreturned slots counted as non-relevant."""
-    output = []
+    output: list[tuple[str, float, float]] = []
     for annotation in ANNOTATIONS:
         relevant = {doc_id for doc_id in index.documents if (doc_id - 1) % 10 == annotation.relevant_topic}
-        scores = []
+        scores: list[float] = []
         for model in (TfIdf(), BM25()):
             top = ranked_search(index, annotation.query, model, top_k=5)
             scores.append(sum(result.doc_id in relevant for result in top) / 5)
