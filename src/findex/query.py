@@ -3,15 +3,18 @@
 from dataclasses import dataclass
 import re
 from typing import Protocol
+from .inverted import DocMeta, Posting
 
 from .tokenizer import tokenize
 
 
 class EvaluatableIndex(Protocol):
-    documents: dict
-    positions: dict | None
+    @property
+    def documents(self) -> dict[int, DocMeta]: ...
+    @property
+    def positions(self) -> dict[str, dict[int, list[int]]] | None: ...
 
-    def __getitem__(self, term: str): ...
+    def __getitem__(self, term: str) -> tuple[Posting, ...]: ...
     def __contains__(self, term: object) -> bool: ...
 
 
