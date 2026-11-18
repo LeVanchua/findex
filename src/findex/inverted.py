@@ -2,9 +2,8 @@
 
 from array import array
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
 
 from .corpus import iter_documents
 from .tokenizer import tokenize
@@ -78,18 +77,19 @@ def repr_memory(root: str | Path, variant: str) -> tuple[object, int]:
     """
     if variant not in {"plain", "slots", "array"}:
         raise ValueError(variant)
-    postings = defaultdict(list) if variant != "array" else defaultdict(lambda: (array("I"), array("I")))
+    regular: defaultdict[str, list[PlainPosting | Posting]] = defaultdict(list)
+    compact: defaultdict[str, tuple[array[int], array[int]]] = defaultdict(lambda: (array("I"), array("I")))
     total = 0
     for doc_id, document in enumerate(iter_documents(root), 1):
         counts = Counter(tokenize(document.text))
         for term, frequency in counts.items():
             total += 1
             if variant == "array":
-                docs, freqs = postings[term]
+                docs, freqs = compact[term]
                 docs.append(doc_id)
                 freqs.append(frequency)
             elif variant == "plain":
-                postings[term].append(PlainPosting(doc_id, frequency))
+                regular[term].append(PlainPosting(doc_id, frequency))
             else:
-                postings[term].append(Posting(doc_id, frequency))
-    return postings, total
+                regular[term].append(Posting(doc_id, frequency))
+    return (compact if variant == "array" else regular), total
