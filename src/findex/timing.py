@@ -3,18 +3,19 @@
 import functools
 import logging
 from time import perf_counter
-from typing import Callable, TypeVar
+from typing import Callable, ParamSpec, TypeVar
 
-F = TypeVar("F", bound=Callable)
+P = ParamSpec("P")
+R = TypeVar("R")
 logger = logging.getLogger("findex.timing")
 
 
-def timed(function: F) -> F:
+def timed(function: Callable[P, R]) -> Callable[P, R]:
     @functools.wraps(function)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         started = perf_counter()
         try:
             return function(*args, **kwargs)
         finally:
             logger.info("@timed %s %.6f s", function.__qualname__, perf_counter() - started)
-    return wrapper  # type: ignore[return-value]
+    return wrapper
