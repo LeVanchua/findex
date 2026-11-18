@@ -4,9 +4,9 @@ from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from functools import cached_property, lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Generator
 
-from .inverted import InvertedIndex, Posting
+from .inverted import DocMeta, InvertedIndex, Posting
 from .serialization import load_index
 from .timing import timed
 
@@ -17,7 +17,8 @@ class Index(Mapping[str, tuple[Posting, ...]]):
 Use open_index(path) for deterministic cleanup of transient query caches.
 """
 
-    __hash__ = object.__hash__  # Index identity is the LRU-cache namespace.
+    def __hash__(self) -> int:
+        return object.__hash__(self)  # identity scopes the LRU cache to this index
 
     def __init__(self, raw: InvertedIndex):
         self._data = raw
@@ -63,12 +64,12 @@ Use open_index(path) for deterministic cleanup of transient query caches.
         return len(self._data.postings.get(term, ()))
 
     @property
-    def documents(self):
+    def documents(self) -> dict[int, DocMeta]:
         self._check_open()
         return self._data.documents
 
     @property
-    def positions(self):
+    def positions(self) -> dict[str, dict[int, list[int]]] | None:
         self._check_open()
         return self._data.positions
 
@@ -84,6 +85,9 @@ Use open_index(path) for deterministic cleanup of transient query caches.
         self.__dict__.pop("avg_doc_length", None)
         self._closed = True
 
+    def postings_for(self, term: str) -> tuple[Posting, ...]:
+        return self[term] if term in self else ()
+
 
 @timed
 def load_model(path: str | Path, fmt: str = "pickle") -> Index:
@@ -92,7 +96,7 @@ def load_model(path: str | Path, fmt: str = "pickle") -> Index:
 
 
 @contextmanager
-def open_index(path: str | Path, fmt: str = "pickle") -> Iterator[Index]:
+def open_index(path: str | Path, fmt: str = "pickle") -> Generator[Index, None, None]:
     index = load_model(path, fmt)
     try:
         yield index
