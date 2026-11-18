@@ -8,3 +8,8 @@ __pycache__/
 index.bin
 index.json
 *.pickle
+dist/
+*.whl
+.hypothesis/
+.coverage
+htmlcov/
