@@ -114,15 +114,15 @@ def search(index: InvertedIndex, query: str, engine: str = "merge") -> list[int]
             if not stack:
                 raise ValueError("NOT requires an operand")
             value = stack.pop()
-            stack.append(merge_not(all_ids, value) if engine == "merge" else set(all_ids) - set(value))
+            stack.append(merge_not(all_ids, sorted(value)) if engine == "merge" else set(all_ids) - set(value))
         elif token in {"AND", "OR"}:
             if len(stack) < 2:
                 raise ValueError(f"{token} requires two operands")
             right, left = stack.pop(), stack.pop()
             if engine == "merge":
-                stack.append(merge_and(left, right) if token == "AND" else merge_or(left, right))
+                stack.append(merge_and(sorted(left), sorted(right)) if token == "AND" else merge_or(sorted(left), sorted(right)))
             else:
-                stack.append(left & right if token == "AND" else left | right)
+                stack.append(set(left) & set(right) if token == "AND" else set(left) | set(right))
         else:
             docs = [p.doc_id for p in index.postings.get(token, [])]
             stack.append(docs if engine == "merge" else set(docs))
