@@ -3,19 +3,19 @@
 from dataclasses import dataclass
 from time import perf_counter
 import tracemalloc
-from typing import Callable, TypeVar
+from typing import Callable, Generic, TypeVar
 
 T = TypeVar("T")
 
 
 @dataclass
-class Profile:
-    value: object
+class Profile(Generic[T]):
+    value: T
     seconds: float
     peak_bytes: int
 
 
-def profile(func: Callable[[], T]) -> Profile:
+def profile(func: Callable[[], T]) -> Profile[T]:
     tracemalloc.start()
     try:
         started = perf_counter()
