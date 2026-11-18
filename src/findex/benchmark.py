@@ -24,7 +24,8 @@ def benchmark(data: Path, repetitions: int = 100) -> None:
     for name, terms in (("common", top), ("rare", rare)):
         query = " ".join(terms)
         for engine in ("merge", "set"):
-            times = []
+            times: list[float] = []
+            result: list[int] = []
             for _ in range(repetitions):
                 begin = perf_counter()
                 result = search(index, query, engine)
