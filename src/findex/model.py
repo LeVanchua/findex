@@ -4,7 +4,10 @@ from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from functools import cached_property, lru_cache
 from pathlib import Path
-from typing import Generator
+from typing import TYPE_CHECKING, Generator
+
+if TYPE_CHECKING:
+    from .numpy_rank import NumPyIndex
 
 from .inverted import DocMeta, InvertedIndex, Posting
 from .serialization import load_index
@@ -73,6 +76,14 @@ Use open_index(path) for deterministic cleanup of transient query caches.
         self._check_open()
         return self._data.positions
 
+    @cached_property
+    def numpy_index(self) -> "NumPyIndex":
+        """Construct the dense vector representation once per opened index."""
+        from .numpy_rank import NumPyIndex
+
+        self._check_open()
+        return NumPyIndex.from_index(self)
+
     @lru_cache(maxsize=512)
     def cached_ids(self, query: str) -> tuple[int, ...]:
         """LRU memoization by query text for the current index instance."""
@@ -83,6 +94,7 @@ Use open_index(path) for deterministic cleanup of transient query caches.
     def close(self) -> None:
         self.cached_ids.cache_clear()
         self.__dict__.pop("avg_doc_length", None)
+        self.__dict__.pop("numpy_index", None)
         self._closed = True
 
     def postings_for(self, term: str) -> tuple[Posting, ...]:

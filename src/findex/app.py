@@ -21,6 +21,8 @@ from .inverted import build_index
 from .crawler import CrawlStats, crawl
 from .model import open_index
 from .ranking import BM25, TfIdf, ranked_search
+from .numpy_rank import ranked_search_numpy
+from .memmap_index import save_memmap
 from .serialization import save_index
 from .stats import streaming_stats
 
@@ -132,13 +134,15 @@ def search_command(
     format: Annotated[Literal["pickle", "json"], typer.Option("--format")] = "pickle",
     corpus: Annotated[Path | None, typer.Option("--corpus", help="Folder for snippets")] = None,
     json_output: Annotated[bool, typer.Option("--json", help="Machine-readable JSON to stdout")] = False,
+    engine: Annotated[Literal["python", "numpy"], typer.Option("--engine")] = "numpy",
 ) -> None:
     """Rank matching documents and optionally emit clean JSON."""
     try:
         if not index.is_file():
             raise FileNotFoundError(f"Index file not found: {index}")
         with open_index(index, format) as opened:
-            found = ranked_search(opened, query, BM25() if scorer == "bm25" else TfIdf(), top, corpus)
+            searcher = ranked_search_numpy if engine == "numpy" else ranked_search
+            found = searcher(opened, query, BM25() if scorer == "bm25" else TfIdf(), top, corpus)
         if json_output:
             print(json.dumps([
                 {"doc_id": item.doc_id, "title": item.title, "path": item.path,
@@ -183,6 +187,19 @@ def serve_command(
     import uvicorn
 
     uvicorn.run("findex.web.app:create_app", factory=True, host=host, port=int(os.getenv("PORT", port)), workers=workers)
+
+
+@app.command("compact")
+def compact_command(
+    source: Annotated[Path, typer.Argument(help="Corpus directory")],
+    out: Annotated[Path, typer.Option("--out")] = Path("postings_memmap"),
+) -> None:
+    """Persist postings as disk-backed NumPy int32 arrays."""
+    try:
+        save_memmap(build_index(source), out)
+        out_console.print(f"NumPy memory-mapped postings saved to {out}")
+    except (OSError, ValueError) as error:
+        fail(error)
 
 
 if __name__ == "__main__":
