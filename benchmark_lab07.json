@@ -1,0 +1,35 @@
+[
+  {
+    "case": "1 worker · sync def",
+    "workers": 1,
+    "requests": 240,
+    "concurrency": 20,
+    "errors": 0,
+    "qps": 25.83,
+    "p50_ms": 763.82,
+    "p95_ms": 896.58,
+    "p99_ms": 938.43
+  },
+  {
+    "case": "1 worker · async def",
+    "workers": 1,
+    "requests": 240,
+    "concurrency": 20,
+    "errors": 0,
+    "qps": 119.74,
+    "p50_ms": 163.34,
+    "p95_ms": 190.2,
+    "p99_ms": 222.47
+  },
+  {
+    "case": "4 workers · sync def",
+    "workers": 4,
+    "requests": 240,
+    "concurrency": 20,
+    "errors": 0,
+    "qps": 26.33,
+    "p50_ms": 751.02,
+    "p95_ms": 848.09,
+    "p99_ms": 878.27
+  }
+]
