@@ -1,7 +1,7 @@
 [project]
 name = "findex"
-version = "0.4.0"
-description = "Streaming Ukrainian text corpus statistics (Python lab 01)"
+version = "0.5.0"
+description = "Streaming ranked search with parallel indexing"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["typer>=0.12", "rich>=13"]
@@ -10,7 +10,14 @@ dependencies = ["typer>=0.12", "rich>=13"]
 findex = "findex.app:app"
 
 [dependency-groups]
-dev = ["pytest>=8", "pytest-cov>=5", "hypothesis>=6", "pyright>=1.1", "ruff>=0.9"]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "hypothesis>=6",
+    "pyright>=1.1",
+    "ruff>=0.9",
+    "matplotlib>=3.11.2",
+]
 
 [build-system]
 requires = ["hatchling"]
