@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 from pathlib import Path
 import sys
 from typing import Annotated, Literal
@@ -11,7 +12,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 import typer
 
-from .inverted import build_index
+from .parallel import ExecutorKind, build_parallel
 from .model import open_index
 from .ranking import BM25, TfIdf, ranked_search
 from .serialization import save_index
@@ -47,15 +48,18 @@ def index_command(
     out: Annotated[Path, typer.Option("--out", help="Output index file")] = Path("index.bin"),
     format: Annotated[Literal["pickle", "json"], typer.Option("--format")] = "pickle",
     positions: Annotated[bool, typer.Option("--positions", help="Store term positions")] = False,
+    workers: Annotated[int, typer.Option("--workers", min=1)] = min(8, os.cpu_count() or 1),
+    executor: Annotated[ExecutorKind, typer.Option("--executor")] = "processes",
 ) -> None:
     """Build and save an index, showing a Rich progress indicator."""
     try:
         with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=error_console) as progress:
             task = progress.add_task("Indexing documents...", total=None)
-            result = build_index(data, with_positions=positions)
+            result, merge_seconds = build_parallel(data, workers=workers, executor=executor, with_positions=positions)
             save_index(result, out, format)
             progress.update(task, description="Index saved")
         out_console.print(f"Indexed {result.document_count} documents; {result.vocabulary_size} terms → {out}")
+        logging.getLogger("findex").info("merge_seconds=%.6f executor=%s workers=%d", merge_seconds, executor, workers)
     except (OSError, UnicodeError, ValueError) as error:
         fail(error)
 
