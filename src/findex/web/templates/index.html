@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1224">
+  <title>findex — пошук у документах</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif; background: #0b1224; color: #e8efff; }
+    * { box-sizing: border-box; } body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 70% 0%, #172b5a 0, transparent 52%), #0b1224; }
+    .wrap { max-width: 1000px; margin: auto; padding: 48px 24px 80px; } a { color: inherit; text-decoration: none; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { font-size: 24px; font-weight: 850; letter-spacing: -1px; } .brand span { color: #7c9dff; }
+    .badge { color: #9cb4e8; font-size: 12px; border: 1px solid #364569; padding: 7px 12px; border-radius: 24px; }
+    .hero { padding: 78px 0 34px; } h1 { font-size: clamp(38px, 6vw, 64px); max-width: 760px; line-height: 1.06; letter-spacing: -3px; margin: 0 0 15px; }
+    .muted { color: #a5b5d5; } .hero p { font-size: 17px; margin: 0 0 35px; }
+    form { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 18px; background: #192642; border: 1px solid #425477; box-shadow: 0 18px 54px #03091a70; }
+    input { flex: 1; min-width: 0; padding: 15px 14px; color: #fff; background: transparent; border: 0; outline: 0; font-size: 17px; }
+    button, .next { border: 0; background: #7597ff; color: #07122c; border-radius: 12px; padding: 15px 25px; font-size: 15px; font-weight: 750; cursor: pointer; }
+    button:hover, .next:hover { background: #a6bbff; } .metrics { display: flex; flex-wrap: wrap; gap: 30px; padding: 27px 0; border-bottom: 1px solid #263452; }
+    .metric strong { display: block; font-size: 22px; } .metric small { color: #9fafd1; font-size: 12px; }
+    .results-heading { margin-top: 37px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    h2 { font-size: 20px; letter-spacing: -.4px; } .card { padding: 25px 0; border-bottom: 1px solid #263452; }
+    .title { color: #a3b9ff; font-size: 21px; font-weight: 680; } .title:hover { text-decoration: underline; }
+    .path { color: #8292b6; font-size: 12px; margin: 7px 0; overflow-wrap: anywhere; }
+    .snippet { font-size: 15px; line-height: 1.7; color: #c0cce6; } mark { background: #c7ac5e; color: #18223b; border-radius: 3px; padding: 0 2px; }
+    .score { display: inline-block; color: #99c7ac; font-size: 12px; margin: 8px 0; }
+    .pages { display: flex; gap: 9px; align-items: center; margin: 30px 0; } .next { padding: 11px 15px; }
+    .error { color: #ffb4b4; } footer { margin-top: 90px; font-size: 13px; color: #8494b7; }
+    @media (max-width: 600px) { .wrap { padding: 24px 17px 55px; } .hero { padding-top: 62px; } h1 { letter-spacing: -1.8px; } button { padding: 15px; } }
+  </style>
+</head>
+<body><main class="wrap">
+  <header><a class="brand" href="/">fin<span>dex</span><span style="color:#7b88aa;font-weight:400"> / search</span></a><span class="badge">Python · FastAPI · BM25</span></header>
+  <section class="hero"><h1>Знайди потрібне.<br>Серед тисяч текстів.</h1>
+    <p class="muted">Швидкий повнотекстовий пошук по власному корпусу документів.</p>
+    <form method="get" action="/"><input name="q" aria-label="Пошуковий запит" placeholder="Наприклад: Python OR алгоритм" value="{{ q }}" required autofocus><button type="submit">Знайти →</button></form>
+  </section>
+  <section class="metrics"><div class="metric"><strong>{{ '{:,}'.format(documents).replace(',', ' ') }}</strong><small>документів</small></div><div class="metric"><strong>{{ '{:,}'.format(vocabulary).replace(',', ' ') }}</strong><small>унікальних термінів</small></div><div class="metric"><strong>BM25</strong><small>алгоритм ранжування</small></div></section>
+  {% if error %}<p class="error">Неправильний запит: {{ error }}</p>{% endif %}
+  {% if results %}
+    <div class="results-heading"><h2>Результати за запитом «{{ q }}»</h2><span class="muted">Знайдено: {{ results.total }}</span></div>
+    {% for hit in results.results %}<article class="card"><a class="title" href="/document/{{ hit.doc_id }}">{{ hit.title }}</a><div class="path">{{ hit.path }}</div><div class="score">Релевантність: {{ '%.4f'|format(hit.score) }} · Документ №{{ hit.doc_id }}</div><div class="snippet">{{ safe_highlight(hit.snippet)|safe if hit.snippet else 'Натисніть назву, щоб переглянути документ.' }}</div></article>{% endfor %}
+    {% if not results.results %}<p class="muted">Нічого не знайдено. Спробуйте інші слова або оператор OR.</p>{% endif %}
+    {% if results.pages > 1 %}<nav class="pages">
+      {% if results.page > 1 %}<a class="next" href="/?q={{ q|urlencode }}&page={{ results.page-1 }}">← Назад</a>{% endif %}
+      <span class="muted">{{ results.page }} / {{ results.pages }}</span>
+      {% if results.page < results.pages %}<a class="next" href="/?q={{ q|urlencode }}&page={{ results.page+1 }}">Далі →</a>{% endif %}
+    </nav>{% endif %}
+  {% endif %}
+  <footer>findex v0.7.0 · <a href="/docs">Інтерактивна документація API</a> · <a href="/stats">Статистика JSON</a></footer>
+</main></body></html>

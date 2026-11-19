@@ -173,5 +173,17 @@ def stats_command(data: Annotated[Path, typer.Argument(help="Folder with documen
         fail(error)
 
 
+@app.command("serve")
+def serve_command(
+    port: Annotated[int, typer.Option("--port", min=1, max=65535)] = 8000,
+    workers: Annotated[int, typer.Option("--workers", min=1)] = 1,
+    host: Annotated[str, typer.Option("--host")] = "0.0.0.0",
+) -> None:
+    """Serve the search UI and JSON API through Uvicorn."""
+    import uvicorn
+
+    uvicorn.run("findex.web.app:create_app", factory=True, host=host, port=int(os.getenv("PORT", port)), workers=workers)
+
+
 if __name__ == "__main__":
     app()
