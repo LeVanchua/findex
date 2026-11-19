@@ -1,0 +1,34 @@
+{
+  "permission": "Local HTTP server created and owned by this benchmark; robots.txt allows /",
+  "page_limit": 200,
+  "site_pages": 240,
+  "host_delay": 0.003,
+  "per_host": 20,
+  "trials_per_configuration": 3,
+  "rows": [
+    {
+      "concurrency": 1,
+      "pages": 200,
+      "wall_s": 5.815935848000208,
+      "pages_per_s": 34.388274772454615,
+      "errors": 0,
+      "peak_rss_mib": 26.70703125
+    },
+    {
+      "concurrency": 5,
+      "pages": 200,
+      "wall_s": 1.2395942200000718,
+      "pages_per_s": 161.34312081576857,
+      "errors": 0,
+      "peak_rss_mib": 26.70703125
+    },
+    {
+      "concurrency": 20,
+      "pages": 200,
+      "wall_s": 0.8463813239995943,
+      "pages_per_s": 236.3001100436567,
+      "errors": 0,
+      "peak_rss_mib": 27.95703125
+    }
+  ]
+}
