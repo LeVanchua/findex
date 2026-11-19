@@ -17,7 +17,8 @@ from pydantic import BaseModel, ConfigDict
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from findex.model import Index, load_model
-from findex.ranking import BM25, TfIdf, ranked_search
+from findex.ranking import BM25, TfIdf
+from findex.numpy_rank import ranked_search_numpy
 
 log = logging.getLogger("findex.web")
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
@@ -81,7 +82,7 @@ def get_settings(request: Request) -> Settings:
 def do_search(index: Index, q: str, k: int, scorer: ScorerName, page: int, corpus: Path | None) -> SearchPage:
     # The query parser and BM25 are CPU work: execute this from a sync route/thread pool.
     total = len(index.cached_ids(q))
-    hits = ranked_search(index, q, BM25() if scorer == "bm25" else TfIdf(), min(total, page * k), corpus)
+    hits = ranked_search_numpy(index, q, BM25() if scorer == "bm25" else TfIdf(), min(total, page * k), corpus)
     return SearchPage(
         q=q, k=k, scorer=scorer, page=page, total=total,
         pages=(total + k - 1) // k,
@@ -113,7 +114,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 application.state.index.close()
                 application.state.index = None
 
-    application = FastAPI(title="findex search", version="0.7.0", lifespan=lifespan)
+    application = FastAPI(title="findex search", version="1.0.0", lifespan=lifespan)
     application.state.settings = configured
     application.state.index = None
 
