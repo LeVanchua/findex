@@ -2,7 +2,9 @@
 
 [![CI](https://github.com/LeVanchua/findex/actions/workflows/ci.yml/badge.svg)](https://github.com/LeVanchua/findex/actions/workflows/ci.yml)
 
-**Вебпошук:** публічну адресу Railway буде додано після успішного розгортання. Поточна версія: `0.7.0`.
+**Публічна адреса вебзастосунку:** https://findex-production-0faafce3.up.railway.app
+
+**Версія:** 0.7.0
 
 Навчальний проєкт із поступовим розширенням функцій:
 
