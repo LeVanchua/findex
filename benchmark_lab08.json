@@ -1,0 +1,41 @@
+{
+  "scorer": [
+    {
+      "case": "частий термін",
+      "query": "python",
+      "python_ms": 0.3422,
+      "numpy_ms": 0.0506,
+      "speedup": 6.763
+    },
+    {
+      "case": "рідкісний термін",
+      "query": "999",
+      "python_ms": 0.0081,
+      "numpy_ms": 0.0271,
+      "speedup": 0.299
+    },
+    {
+      "case": "три терми",
+      "query": "python OR база OR тестування",
+      "python_ms": 2.3728,
+      "numpy_ms": 0.0986,
+      "speedup": 24.065
+    }
+  ],
+  "memmap_10x": [
+    {
+      "mode": "pickle",
+      "documents": 10000,
+      "load_ms": 390.918,
+      "peak_process_rss_kib": 82696,
+      "storage_bytes": 3271784
+    },
+    {
+      "mode": "memmap",
+      "documents": 10000,
+      "load_ms": 18.077,
+      "peak_process_rss_kib": 82696,
+      "storage_bytes": 1694742
+    }
+  ]
+}
