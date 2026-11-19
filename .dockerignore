@@ -1,0 +1,12 @@
+.venv
+.git
+.pytest_cache
+.ruff_cache
+.hypothesis
+__pycache__
+data
+dist
+*.bin
+*.log
+*.png
+*.jsonl
