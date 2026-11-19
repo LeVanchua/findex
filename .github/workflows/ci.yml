@@ -1,18 +1,19 @@
 name: CI
-
 on:
   push:
   pull_request:
-
 jobs:
   checks:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-
       - run: uv sync
       - run: uv run ruff check .
       - run: uv run pyright
-      - run: uv run pytest -q
+      - run: uv run python -m pytest -q --benchmark-json=benchmark-ci.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-benchmark
+          path: benchmark-ci.json
