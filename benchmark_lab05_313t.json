@@ -1,0 +1,65 @@
+{
+  "machine": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "logical_cpus": 9,
+  "python": "/home/agent/.local/share/uv/python/cpython-3.13+freethreaded-linux-x86_64-gnu/bin/python3.13t",
+  "gil_enabled": "False",
+  "repetitions": 3,
+  "rows": [
+    {
+      "executor": "threads",
+      "workers": 1,
+      "wall_s": 0.3065817459992104,
+      "cpu_s": 0.30621400000000004,
+      "parent_peak_rss_mb": 25.5546875,
+      "merge_s": 0.0034396490000290214,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 1.0
+    },
+    {
+      "executor": "threads",
+      "workers": 2,
+      "wall_s": 0.17307576999974117,
+      "cpu_s": 0.303828,
+      "parent_peak_rss_mb": 26.14453125,
+      "merge_s": 0.002974551000079373,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 1.771373000389765
+    },
+    {
+      "executor": "threads",
+      "workers": 4,
+      "wall_s": 0.12559841399979632,
+      "cpu_s": 0.385073,
+      "parent_peak_rss_mb": 27.3046875,
+      "merge_s": 0.00208509900039644,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 2.440968291205553
+    },
+    {
+      "executor": "threads",
+      "workers": 8,
+      "wall_s": 0.09655423999993218,
+      "cpu_s": 0.48419900000000005,
+      "parent_peak_rss_mb": 28.40234375,
+      "merge_s": 0.004884193000179948,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 3.1752282033334396
+    },
+    {
+      "executor": "threads",
+      "workers": 9,
+      "wall_s": 0.10563504899982945,
+      "cpu_s": 0.500669,
+      "parent_peak_rss_mb": 28.93359375,
+      "merge_s": 0.005346885000108159,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 2.902272956769352
+    }
+  ]
+}

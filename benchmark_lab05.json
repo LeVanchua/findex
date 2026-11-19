@@ -1,0 +1,175 @@
+{
+  "machine": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "logical_cpus": 9,
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "gil_enabled": true,
+  "repetitions": 3,
+  "rows": [
+    {
+      "executor": "serial",
+      "workers": 1,
+      "wall_s": 0.24512451000009605,
+      "cpu_s": 0.24511199999999994,
+      "parent_peak_rss_mb": 16.875,
+      "merge_s": 0.001675904999501654,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 1.0
+    },
+    {
+      "executor": "serial",
+      "workers": 2,
+      "wall_s": 0.24281433800024388,
+      "cpu_s": 0.242666,
+      "parent_peak_rss_mb": 17.0,
+      "merge_s": 0.001582927000526979,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 1.0095141498598401
+    },
+    {
+      "executor": "serial",
+      "workers": 4,
+      "wall_s": 0.24297003899937408,
+      "cpu_s": 0.242788,
+      "parent_peak_rss_mb": 17.0,
+      "merge_s": 0.0016731000005165697,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 1.0088672291019698
+    },
+    {
+      "executor": "serial",
+      "workers": 8,
+      "wall_s": 0.24922550600058457,
+      "cpu_s": 0.24913399999999997,
+      "parent_peak_rss_mb": 17.125,
+      "merge_s": 0.0018567419992905343,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.9835450389235887
+    },
+    {
+      "executor": "serial",
+      "workers": 9,
+      "wall_s": 0.25002677100019355,
+      "cpu_s": 0.249992,
+      "parent_peak_rss_mb": 17.125,
+      "merge_s": 0.0020754150000357185,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.9803930555896604
+    },
+    {
+      "executor": "threads",
+      "workers": 1,
+      "wall_s": 0.22874646600030246,
+      "cpu_s": 0.228747,
+      "parent_peak_rss_mb": 17.125,
+      "merge_s": 0.0016184289997909218,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 1.0715991127039834
+    },
+    {
+      "executor": "threads",
+      "workers": 2,
+      "wall_s": 0.27927387800082215,
+      "cpu_s": 0.284424,
+      "parent_peak_rss_mb": 17.125,
+      "merge_s": 0.0015921410004011705,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.8777208658210935
+    },
+    {
+      "executor": "threads",
+      "workers": 4,
+      "wall_s": 0.3518688590002057,
+      "cpu_s": 0.38333799999999996,
+      "parent_peak_rss_mb": 17.25,
+      "merge_s": 0.0016303869997500442,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.6966359873294521
+    },
+    {
+      "executor": "threads",
+      "workers": 8,
+      "wall_s": 0.39934919600000285,
+      "cpu_s": 0.456488,
+      "parent_peak_rss_mb": 17.375,
+      "merge_s": 0.0028165240000816993,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.6138099499268662
+    },
+    {
+      "executor": "threads",
+      "workers": 9,
+      "wall_s": 0.39354589600043255,
+      "cpu_s": 0.44641299999999995,
+      "parent_peak_rss_mb": 17.5,
+      "merge_s": 0.002152318000298692,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.6228613040849158
+    },
+    {
+      "executor": "processes",
+      "workers": 1,
+      "wall_s": 0.3960088900003029,
+      "cpu_s": 0.39772799999999997,
+      "parent_peak_rss_mb": 20.875,
+      "merge_s": 0.0018238029997519334,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.6189873919242281
+    },
+    {
+      "executor": "processes",
+      "workers": 2,
+      "wall_s": 0.29474151999966125,
+      "cpu_s": 0.529758,
+      "parent_peak_rss_mb": 19.54296875,
+      "merge_s": 0.0025613620000513038,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.8316592450238357
+    },
+    {
+      "executor": "processes",
+      "workers": 4,
+      "wall_s": 0.2457708490001096,
+      "cpu_s": 0.766981,
+      "parent_peak_rss_mb": 18.75,
+      "merge_s": 0.0016900249993341276,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 0.9973701559699082
+    },
+    {
+      "executor": "processes",
+      "workers": 8,
+      "wall_s": 0.21107670299988968,
+      "cpu_s": 1.2592290000000002,
+      "parent_peak_rss_mb": 18.375,
+      "merge_s": 0.001725286999317177,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 1.161305376274634
+    },
+    {
+      "executor": "processes",
+      "workers": 9,
+      "wall_s": 0.21209452099992632,
+      "cpu_s": 1.3073919999999999,
+      "parent_peak_rss_mb": 18.375,
+      "merge_s": 0.001892173999294755,
+      "docs": 1000,
+      "terms": 1106,
+      "speedup": 1.1557324010278474
+    }
+  ]
+}
