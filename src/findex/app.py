@@ -1,18 +1,24 @@
 """Installable findex CLI: Typer commands with Rich output and clean JSON."""
 
+import asyncio
 import json
 import logging
 import os
 from pathlib import Path
 import sys
+from time import monotonic
 from typing import Annotated, Literal
 
 from rich.console import Console
+from rich.live import Live
+from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 import typer
 
 from .parallel import ExecutorKind, build_parallel
+from .inverted import build_index
+from .crawler import CrawlStats, crawl
 from .model import open_index
 from .ranking import BM25, TfIdf, ranked_search
 from .serialization import save_index
@@ -55,13 +61,66 @@ def index_command(
     try:
         with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=error_console) as progress:
             task = progress.add_task("Indexing documents...", total=None)
-            result, merge_seconds = build_parallel(data, workers=workers, executor=executor, with_positions=positions)
+            if any(data.rglob("*.jsonl")):
+                # JSONL pages are streamed as virtual documents by iter_documents.
+                result = build_index(data, with_positions=positions)
+                merge_seconds = 0.0
+            else:
+                result, merge_seconds = build_parallel(data, workers=workers, executor=executor, with_positions=positions)
             save_index(result, out, format)
             progress.update(task, description="Index saved")
         out_console.print(f"Indexed {result.document_count} documents; {result.vocabulary_size} terms → {out}")
         logging.getLogger("findex").info("merge_seconds=%.6f executor=%s workers=%d", merge_seconds, executor, workers)
     except (OSError, UnicodeError, ValueError) as error:
         fail(error)
+
+
+@app.command("crawl")
+def crawl_command(
+    url: Annotated[str, typer.Argument(help="Permitted start URL (robots.txt respected)")],
+    out: Annotated[Path, typer.Option("--out")] = Path("pages.jsonl"),
+    max_pages: Annotated[int, typer.Option("--max-pages", min=1)] = 200,
+    concurrency: Annotated[int, typer.Option("--concurrency", min=1)] = 5,
+    per_host: Annotated[int, typer.Option("--per-host", min=1)] = 2,
+    host_delay: Annotated[float, typer.Option("--host-delay", min=0)] = 0.02,
+    timeout: Annotated[float, typer.Option("--timeout", min=0.01)] = 5.0,
+    log_path: Annotated[Path, typer.Option("--log-file")] = Path("crawl.log"),
+) -> None:
+    """Crawl allowed HTML pages into streaming JSONL with live Rich counters."""
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    handler = logging.FileHandler(log_path, encoding="utf-8", mode="w")
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    crawl_logger = logging.getLogger("findex.crawl")
+    crawl_logger.addHandler(handler)
+    crawl_logger.setLevel(logging.INFO)
+    state = CrawlStats()
+
+    async def run() -> None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("w", encoding="utf-8") as stream:
+            with Live(console=error_console, refresh_per_second=5, transient=True) as live:
+                async for item in crawl(url, max_pages=max_pages, concurrency=concurrency,
+                                        per_host=per_host, host_delay=host_delay,
+                                        timeout_s=timeout, stats=state):
+                    if 200 <= item.status < 300:
+                        stream.write(json.dumps({"url": item.url, "text": item.text,
+                                                 "status": item.status, "bytes": item.size_bytes,
+                                                 "elapsed_s": item.elapsed_s}, ensure_ascii=False) + "\n")
+                        stream.flush()
+                    live.update(Panel(f"Pages: {state.pages}  Rate: {state.pages_per_second:.1f}/s  "
+                                      f"In flight: {state.in_flight}  Errors: {state.errors}  "
+                                      f"Queue: {state.queue_depth}", title="findex crawl"))
+
+    started = monotonic()
+    try:
+        asyncio.run(run())
+        out_console.print(f"Crawled {state.pages} pages in {monotonic() - started:.2f}s; "
+                          f"errors={state.errors}; saved {out}; log {log_path}")
+    except (OSError, ValueError) as error:
+        fail(error)
+    finally:
+        crawl_logger.removeHandler(handler)
+        handler.close()
 
 
 @app.command("search")

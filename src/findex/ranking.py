@@ -2,10 +2,11 @@
 
 from dataclasses import dataclass, field
 import heapq
+import json
 import math
 from pathlib import Path
 import re
-from typing import Protocol
+from typing import Protocol, cast
 import logging
 
 from .model import Index
@@ -69,6 +70,26 @@ def make_snippet(text: str, terms: tuple[str, ...], radius: int = 80) -> str:
     return ("…" if start else "") + fragment + ("…" if end < len(text) else "")
 
 
+def _jsonl_snippet(base: Path, relative: str, terms: tuple[str, ...]) -> str:
+    """Resolve a virtual crawl document to a single JSONL record for snippets."""
+    stem, marker, suffix = Path(relative).stem.rpartition("_page_")
+    if not marker or not suffix.isdigit():
+        return ""
+    file = (base / Path(relative).parent / f"{stem}.jsonl").resolve()
+    if not file.is_relative_to(base) or not file.is_file():
+        return ""
+    with file.open(encoding="utf-8") as stream:
+        for row, line in enumerate(stream, 1):
+            if row == int(suffix):
+                payload: object = json.loads(line)
+                if isinstance(payload, dict):
+                    value = cast(dict[str, object], payload).get("text")
+                    if isinstance(value, str):
+                        return make_snippet(value, terms)
+                break
+    return ""
+
+
 @timed
 def ranked_search(index: Index, query: str, scorer: Scorer | None = None,
                   top_k: int = 5, corpus: str | Path | None = None) -> list[SearchResult]:
@@ -95,5 +116,7 @@ def ranked_search(index: Index, query: str, scorer: Scorer | None = None,
             candidate = (base / meta.path).resolve()
             if candidate.is_relative_to(base) and candidate.is_file():
                 snippet = make_snippet(candidate.read_text(encoding="utf-8"), terms)
+            elif candidate.is_relative_to(base):
+                snippet = _jsonl_snippet(base, meta.path, terms)
         results.append(SearchResult(score, -doc_id, doc_id, meta.title, meta.path, snippet))
     return heapq.nlargest(max(0, top_k), results)
